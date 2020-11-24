@@ -1,0 +1,11 @@
+state: enabled
+email: stanwu.space@gmail.com
+access:
+  admin:
+    login: true
+    super: true
+  site:
+    login: true
+fullname: 'Ice bear'
+title: WBB
+hashed_password: $2y$10$B1nuL68SoTNWT.qQ2W9XoeX13EcA.eg1Dx.LXo/URoFcSf4i0Rf5m
