@@ -1,6 +1,5 @@
 ---
 title: 'It''s starting to take shape'
-published: true
 ---
 
 Jeez, who knew customizing something is so much work?

@@ -18,4 +18,11 @@ Funnily enough, I discovered VS code extensions not too long ago, and I really e
 * All aspects of the extensions are broken up
 7. Easy to Debug, simply press F5 and you are good to go
 
+My favourite part about this all
+* This is so cool, this is absolutely so cool!
+* I can use VS code, press F5 to start debugging the extension I'm working on
+* On the newly opened window being debugged, guess what?
+  * **I can open another Extension and work on that!**
+  * **Press F5, BOOM! I can debug that, too! This is the coolest!**
+
 So here we go, I will be documenting my journey on this blog.

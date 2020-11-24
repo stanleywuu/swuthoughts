@@ -1,8 +1,6 @@
 ---
 title: 'First Attempt: Script Runner'
-published: false
 ---
-
 I am making a VS Code extension
 Why?
 * Because it's fun
