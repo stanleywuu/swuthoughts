@@ -2,7 +2,7 @@
 title: 'vstime: A VS Code extension to keep track'
 ---
 
-##I published my extension! [vstime](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
+I published my extension! [vstime](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
 
 There has been an increasing focus on the daily standups at work, I on the other hand am the type of person that works on a variety of items every day.
 Be it CI/CD, backend, front end, utility tools... etc.
