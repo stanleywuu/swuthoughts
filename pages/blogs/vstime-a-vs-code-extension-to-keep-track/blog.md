@@ -1,14 +1,5 @@
 ---
 title: 'vstime: A VS Code extension to keep track'
-content:
-    items:
-        - '@self.children'
-    limit: 5
-    order:
-        by: date
-        dir: desc
-    pagination: true
-    url_taxonomy_filters: true
 ---
 
 I published my extension! [vstime](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
