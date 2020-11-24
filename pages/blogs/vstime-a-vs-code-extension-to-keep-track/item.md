@@ -39,5 +39,5 @@ It also was a stark reminder that I've been wasting a lot of time context switch
 So overall, I think the extension was a success, and I had a good time making the extension.
 
 Feel free to check it out and let me know what you think.
-* Download (VS Code)[https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime]
-* Source code (github)[https://github.com/stanleywuu/vscode-timetracker]
+* Download [VS Code](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
+* Source code [github](https://github.com/stanleywuu/vscode-timetracker)
