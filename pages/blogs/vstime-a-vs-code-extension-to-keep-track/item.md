@@ -1,5 +1,6 @@
 ---
 title: 'vstime: A VS Code extension to keep track'
+media_order: demo.gif
 ---
 
 I published my extension! [vstime](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
@@ -37,6 +38,14 @@ When I forgot what I was working on, I could look at the note in VS code and pic
 It also was a stark reminder that I've been wasting a lot of time context switching between different types of tasks and not focusing on any of them.
 
 So overall, I think the extension was a success, and I had a good time making the extension.
+
+##Demo
+Here is a gif to demonstrate vstime in action
+1. I start tracking using the start tracking command
+2. Enter a short description of what I am working on
+3. Using the Panel on the left, I am able to see what I am currently working on and what I have previously worked on
+4. Use end tracking to commit the record
+![](demo.gif)
 
 Feel free to check it out and let me know what you think.
 * Download [VS Code](https://marketplace.visualstudio.com/items?itemName=swuvsmarket.vstime)
