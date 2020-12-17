@@ -270,3 +270,5 @@ function initializeStatusBar(context: vscode.ExtensionContext): vscode.StatusBar
 As you can see, all of this code is initialization. When the status bar item is created, it's passed on to the Tracker implementation.
 
 We will go to the implementation in the next post of the series.
+
+[Part 1 - Building the tracker](../build-vs-time-part2)
