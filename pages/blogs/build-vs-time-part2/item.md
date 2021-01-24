@@ -33,10 +33,22 @@ I defined four commands
 - "Resume Tracking"
 - "End Tracking"
 
-So the implementation had to do these four things, nothing too fancy
-Ask myself what I am working on before I start tracking time.
+For each of the commands,our implementation has to perform the following
+- Track status of the timer
+- Update time spent in each tab
+- Keep logs updated for diagnostics
+- Update the status item
 
-Built up a string of array to log the current session.
+Each of the four commands corresponds to its own command
+- startTracker()
+- pauseTracker()
+- resumeTracker()
+- stopTracker()
+  
+## startTracker
+1. Ask user what a they are going to work on
+2. Log start
+3. Start the timer
 
 ```javascript
    async startTracker(){
@@ -45,8 +57,63 @@ Built up a string of array to log the current session.
         this.start();
     }
 ```
+```this.start()``` is the method that kicks off a timer.
+It sets the tracking state to be ```true```,
+then we update the status Item so that when a user clicks on it it triggers the ```pause``` command.
+Also start tracking time on the current tabl
+Start timer, the timer is set up to refresh every second.
 
-Both resume and start basically starts the timer
+```javascript
+  private start() {
+    this.isTracking = true;
+    this.trackCurrentFile();
+
+    this.current.resume();
+    this.statusItem.command = "vstime.pause";
+
+    this.timerId = setInterval(() => {
+      const now = Date.now();
+      const total = this.current.update();
+      this.statusItem.text = `${formatTime(total)}`;
+    }, 1000);
+  }
+
+}
+```
+
+## A tengent on how changes are tracked
+There are two items in play here ```current.resume()``` and ```trackCurrentFile()```
+- ```current``` is an ```TrackerValue``` object used to track the time spent in the session
+- ```trackCurrentFile``` is used to track the time spent in the current tab
+
+  
+```javascript
+trackChanges(file: string) {
+    if (!this.isTracking) {
+      return;
+    }
+
+    const lastTracker =
+      this.trackedFiles[this.currentFile] ?? new TrackerValue();
+    // if deactivating, update lastTime.update
+    // if activating, call resume
+    this.logs.push(`stopped at ${Date.now()}`);
+    lastTracker.update();
+    this.trackedFiles[this.currentFile] = lastTracker;
+
+    const tracker = this.trackedFiles[file] ?? new TrackerValue();
+    this.trackedFiles[file] = tracker;
+
+    this.logs.push(`working with ${file} at ${Date.now()}`);
+    this.currentFile = file;
+    tracker.resume();
+  }
+```
+
+## Back to the high level tracker implementation
+
+Resuming the timer and restarting the timer are essentially the same.
+
 ```javascript
     resumeTracker(){
         this.logs.push(`resumed at : ${Date.now()}`);
@@ -54,7 +121,9 @@ Both resume and start basically starts the timer
     }
 ```
 
-I guess I forgot to mention I also built the statusItem :_) It's not important, we can get to that later
+Pausing was set up a little different resume, because I was stupid. I am only realizing this as I type up this blog.
+It is not set up consistently as ```resumeTracker()```
+pauseTracker() maintains the state of ```isTracking``` whereas the ```resumeTrcker()``` delegated that work to start()
 
 ```javascript
     pauseTracker(){
@@ -71,9 +140,12 @@ I guess I forgot to mention I also built the statusItem :_) It's not important, 
 ```
 
 Stop tracking, stop the timer
-Ask for comments
-Update status
-Prepare the logs
+- Ask for comments
+- Update status
+- Prepare the logs
+
+Here is the implementation in its full glory.
+  
 ```javascript
     async stopTracker(){
         this.isTracking = false;
@@ -87,43 +159,19 @@ Prepare the logs
 
         this.statusItem.command = 'vstime.start';
         this.statusItem.text = 'Timer Off';
-        // log to file
-        const values = Object.keys(this.trackedFiles).map((k) =>{
-            return {key: path.parse(k).name, value: this.trackedFiles[k]};
-        });
-
-        const final = {
-            comment: this.comment,
-            total: this.current,
-            breakdowns: values,
-            logs : this.logs,
-        };
-
-        console.log(final);
     }
 ```
 
-Glory of the implementation, current is an object that keeps track of the last updated time, so we can determine what the difference was and add on to our total.
+## TrackerValue Object
+The TrackerValue object is responsible for doing the actual tracking, there are only three operations in the class.
+- update
+  - Add the time that has been elasped to the total time recorded
+- resume
+  - Reume timer with the current time
+- reset
+  - Restart tracking
 
-```javascript
-    private start() {
-        this.isTracking = true;
-        this.currentFile = vscode.window.activeTextEditor?.document.uri.path ?? '';
 
-        this.current.resume();
-        this.statusItem.command = 'vstime.pause';
-
-        this.timerId = setInterval((() => {
-            const now = Date.now();
-            /////////////////////////////////////
-            const total = this.current.update();
-            /////////////////////////////////////
-            this.statusItem.text = `${total / 1000} seconds`;
-        }), 1000);
-    }
-```
-
-It sounds like I lied, the bulk of the work wasn't in this file, in fact, it was in what I called a ```trackerValue```
 ```javascript
 export class TrackerValue{
     total: number;
@@ -154,131 +202,8 @@ export class TrackerValue{
 };
 ```
 
-Again, relatively simple. It does only one thing: Keep track of the difference in time. With the ability to start, update and reset.
-Reading this code, I see that I might be off by a second. You must all be wondering: "why don't you start from 0? Why -1?"
-You know what? That's a great question! I think I made a mistake :)
-
-See kids? That's why you blog, you discover your mistakes, question your past decisions, and wonder where you have gone wrong.
-
-Not too bad, but I didn't like how the isTracking flag is seems to live in different functions for no reason.
-My functions had no consistency, why don't I have a private method for pausing and stopping for example.
-
-It doesn't make sense that I do ```setInterval``` in stop and pause while startTimer simply delegates that work to the start() method.
-
-I will not dive further into how I got to this state, but eventually I got to a state that I felt happy about.
-The [First commit](https://github.com/stanleywuu/vscode-timetracker/commit/b55d41ef814776fc687ba20cdcff4e5b4afb932f#diff-b289dc7d8f7d450e9b8a58427eb9873e1d12be5ad8b03484f671f06c7e848892) after I corrected the filename.
-
-```javascript
-  async startTracker() {
-    this.comment = await vscode.window.showInputBox({
-      prompt: "What are you working on?",
-    });
-    this.reset();
-    this.start();
-    this.trackCurrentFile();
-  }
-
-  resumeTracker() {
-    this.logs.push(`resumed at : ${Date.now()}`);
-    const currentFile = vscode.window.activeTextEditor?.document.uri.path ?? 'Untitled';
-    this.trackChanges(currentFile);
-    this.start();
-  }
-
-  pauseTracker() {
-    this.isTracking = false;
-    this.statusItem.command = "vstime.resume";
-    this.statusItem.text = "Timer Paused";
-
-    this.logs.push(`paused at : ${Date.now()}`);
-
-    this.stopTimer();
-  }
-
-
-  reset(){
-      this.isTracking = false;
-      this.current = new TrackerValue();
-      this.trackedFiles = {};
-  }
-
- async stopTracker(): Promise<TimeTrackingResultItem> {
-
-    this.stopTimer();
-
-    this.isTracking = false;
-    const finalComment = await vscode.window.showInputBox({
-      prompt: "Thoughts, comments, notes",
-    });
-    this.logs.push(`stopped at : ${Date.now()}`);
-
-    this.statusItem.command = "vstime.start";
-    this.statusItem.text = "Timer Off";
-    // log to file
-    const values = this.getBreakdownInfo();
-
-    const final: TimeTrackingResultItem = {
-      date: getToday().getTime(),
-      comment: this.comment,
-      notes: finalComment,
-      total: this.current,
-      breakdowns: values,
-      logs: this.logs,
-    };
-
-    console.log(final);
-
-    return final;
-  }
-  ```
-
-Nice and simple.
-Now I have introduced function to track changes among other things, it was easy to introduce per file tracks as user opens a new tab.
-
-It's as simple as creating a Key value Map as such
-```javascript
-interface KeyValuePair {
-  [key: string]: TrackerValue;
-}
-```
-
-```javascript
-export class Tracker {
-  ...
-  private trackedFiles: KeyValuePair;
-  ...
-  ...
-}
-
-```
-
-Implementation of track changes is as simple as accessing the tracker from the map, and calling the ```update``` and ```resume``` methods.
-
-```javascript
-trackChanges(file: string) {
-    if (!this.isTracking) {
-      return;
-    }
-
-    const lastTracker =
-      this.trackedFiles[this.currentFile] ?? new TrackerValue();
-    // if deactivating, update lastTime.update
-    // if activating, call resume
-    this.logs.push(`stopped at ${Date.now()}`);
-    lastTracker.update();
-    this.trackedFiles[this.currentFile] = lastTracker;
-
-    const tracker = this.trackedFiles[file] ?? new TrackerValue();
-    this.trackedFiles[file] = tracker;
-
-    this.logs.push(`working with ${file} at ${Date.now()}`);
-    this.currentFile = file;
-    tracker.resume();
-  }
-```
-
-Here is an overview of how I built the tracker, now... and here's how they are connected.
-I create the status bar, pass it in to the tracker, and register the commands
+The above was how the tracking functionality was implemented... and here's how they are connected.
+I create the status bar, pass it in to the tracker, and register the commands.
 
 ```javascript
 function initializeTracker(context: vscode.ExtensionContext) : impl.Tracker{
@@ -309,4 +234,8 @@ function initializeTracker(context: vscode.ExtensionContext) : impl.Tracker{
 }
 ```
 
-It's interesting, my intention was to explain more about 
+## Conclusion
+The vstime project was an extension that I saw value in making because work was trending to ask us to track time.
+It was a good exercise in organizing javascript code, blog writing, maintianing and publishing a vscode extension.
+
+Well worth it.
