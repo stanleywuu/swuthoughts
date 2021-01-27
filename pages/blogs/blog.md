@@ -1,10 +1,10 @@
 ---
-title: Blogs
+title: Blog
 visible: true
 content:
     items:
         - '@self.children'
-    limit: 5
+    limit: 0
     order:
         by: date
         dir: desc
